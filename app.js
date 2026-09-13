@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const Listing = require("./model/listing.js");
 const path = require("path");
-const { log } = require("console");
+const { log, error } = require("console");
 const methodOverride = require("method-override");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
@@ -131,7 +131,8 @@ app.all("/*splat", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
-  res.status(statusCode).send(message);
+  // res.status(statusCode).send(message);
+  res.render("error.ejs");
 });
 
 app.listen(8080, () => {
