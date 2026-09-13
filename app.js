@@ -5,6 +5,7 @@ const Listing = require("./model/listing.js");
 const path = require("path");
 const { log } = require("console");
 const methodOverride = require("method-override");
+const wrapAsync = require("./utils/wrapAsync.js");
 
 //use of ejs-Mate:
 const engine = require("ejs-mate");
@@ -52,11 +53,14 @@ app.get("/listings/new", (req, res) => {
 });
 
 //Create route
-app.post("/listings", async (req, res) => {
-  const newListing = new Listing(req.body.listing);
-  await newListing.save();
-  res.redirect("/listings");
-});
+app.post(
+  "/listings",
+  wrapAsync(async (req, res, next) => {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect("/listings");
+  }),
+);
 
 //EDIT route
 app.get("/listings/:id/edit", async (req, res) => {
@@ -98,6 +102,10 @@ app.delete("/listings/:id", async (req, res) => {
 //   console.log("sample was saved");
 //   res.send("sucessful testing");
 // });
+
+app.use((err, req, res) => {
+  res.send("something went wrong");
+});
 
 app.listen(8080, () => {
   console.log("http://localhost:8080");
