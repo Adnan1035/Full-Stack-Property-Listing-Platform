@@ -132,7 +132,7 @@ app.all("/*splat", (req, res, next) => {
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
   // res.status(statusCode).send(message);
-  res.render("error.ejs");
+  res.render("error.ejs", { err });
 });
 
 app.listen(8080, () => {
