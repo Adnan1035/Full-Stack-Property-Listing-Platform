@@ -7,6 +7,7 @@ const { log, error } = require("console");
 const methodOverride = require("method-override");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
+const { listingSchema } = require("./schema.js");
 
 //use of ejs-Mate:
 const engine = require("ejs-mate");
@@ -60,8 +61,9 @@ app.get("/listings/new", (req, res) => {
 app.post(
   "/listings",
   wrapAsync(async (req, res, next) => {
-    if (!req.body.listing) {
-      throw new ExpressError(400, "Send valid data for listings");
+    let result = listingSchema.validate(req.body); //validate listing Schema using joi.dev
+    if (result.error) {
+      throw new ExpressError(400, result.error);
     }
     const newListing = new Listing(req.body.listing);
     await newListing.save();
