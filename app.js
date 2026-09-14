@@ -43,9 +43,20 @@ app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
 
+const validateListing = (req, res, next) => {
+  let { err } = listingSchema.validate(req.body); //validate listing Schema using joi.dev
+  if (error) {
+    let errMsg = err.deatils.map((el) => el.message).join(",");
+    throw new ExpressError(400, errMsg);
+  } else {
+    next();
+  }
+};
+
 //Index route
 app.get(
   "/listings",
+  validateListing,
   wrapAsync(async (req, res) => {
     const allLisitngs = await Listing.find({});
     res.render("listings/index.ejs", { allLisitngs });
@@ -61,10 +72,10 @@ app.get("/listings/new", (req, res) => {
 app.post(
   "/listings",
   wrapAsync(async (req, res, next) => {
-    let result = listingSchema.validate(req.body); //validate listing Schema using joi.dev
-    if (result.error) {
-      throw new ExpressError(400, result.error);
-    }
+    // let result = listingSchema.validate(req.body); //validate listing Schema using joi.dev
+    // if (result.error) {
+    //   throw new ExpressError(400, result.error);
+    // }
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
@@ -84,6 +95,7 @@ app.get(
 //UPDATE route
 app.put(
   "/listings/:id",
+  validateListing,
   wrapAsync(async (req, res) => {
     if (!req.body.listing) {
       throw new ExpressError(400, "Send valid data for listings");
