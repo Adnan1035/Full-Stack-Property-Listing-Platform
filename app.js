@@ -44,9 +44,9 @@ app.get("/", (req, res) => {
 });
 
 const validateListing = (req, res, next) => {
-  let { err } = listingSchema.validate(req.body); //validate listing Schema using joi.dev
+  let { error } = listingSchema.validate(req.body); //validate listing Schema using joi.dev
   if (error) {
-    let errMsg = err.deatils.map((el) => el.message).join(",");
+    let errMsg = error.deatils.map((el) => el.message).join(",");
     throw new ExpressError(400, errMsg);
   } else {
     next();
