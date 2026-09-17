@@ -7,7 +7,7 @@ const { log, error } = require("console");
 const methodOverride = require("method-override");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const { listingSchema } = require("./schema.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 const Review = require("./model/review.js");
 
 //use of ejs-Mate:
@@ -47,11 +47,22 @@ app.get("/", (req, res) => {
 const validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body); //validate listing Schema using joi.dev
   if (error) {
-    let errMsg = error.deatils.map((el) => el.message).join(",");
+    let errMsg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(400, errMsg);
   } else {
     next();
   }
+};
+
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body);
+
+  if (error) {
+    let errMsg = error.details.map((el) => el.message).join(",");
+    return next(new ExpressError(400, errMsg));
+  }
+
+  next();
 };
 
 //Index route
@@ -67,6 +78,15 @@ app.get(
 //New Route
 app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs");
+});
+
+//Show Route
+app.get("/listings/:id", async (req, res) => {
+  let { id } = req.params;
+
+  const listing = await Listing.findById(id).populate("reviews");
+
+  res.render("listings/show.ejs", { listing });
 });
 
 //Create route
@@ -129,17 +149,21 @@ app.delete(
 
 //Reviews:
 //Post Route
-app.post("/listings/:id/reviews", async (req, res) => {
-  let listing = await Listing.findById(req.params.id);
-  let newReview = new Review(req.body.review);
+app.post(
+  "/listings/:id/reviews",
+  validateReview,
+  wrapAsync(async (req, res) => {
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
 
-  listing.reviews.push(newReview);
+    listing.reviews.push(newReview);
 
-  await newReview.save();
-  await listing.save();
+    await newReview.save();
+    await listing.save();
 
-  res.redirect("/listings/${listing._id");
-});
+    res.redirect(`/listings/${listing._id}`);
+  }),
+);
 
 // app.get("/testListing", async (req, res) => {
 //   let sampleListing = new Listing({
@@ -161,7 +185,7 @@ app.all("/*splat", (req, res, next) => {
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
   // res.status(statusCode).send(message);
-  res.render("error.ejs", { err });
+  res.status(statusCode).render("error.ejs", { err });
 });
 
 app.listen(8080, () => {
