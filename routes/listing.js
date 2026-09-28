@@ -18,7 +18,6 @@ const validateListing = (req, res, next) => {
 //Index route
 router.get(
   "/",
-  validateListing,
   wrapAsync(async (req, res) => {
     const allLisitngs = await Listing.find({});
     res.render("listings/index.ejs", { allLisitngs });
@@ -73,6 +72,7 @@ router.put(
     }
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
   }),
 );
@@ -93,6 +93,7 @@ router.delete(
     let { id } = req.params;
     let deleteListing = await Listing.findByIdAndDelete(id);
     console.log(deleteListing);
+    req.flash("warning", "New Listing Deleted!");
     res.redirect("/listings");
   }),
 );
