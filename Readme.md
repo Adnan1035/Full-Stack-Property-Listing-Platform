@@ -53,6 +53,8 @@ npm i joi
 npm i express-session
 npm i connect-flash
 npm i cookie-parser
+npm i passport
+npm i passport-local
 ```
 
 ### 3. Check Directly Installed Packages
