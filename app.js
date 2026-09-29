@@ -8,6 +8,14 @@ const engine = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalSteategy = require("passport-local");
+const User = require("./model/user.js");
+
+//importig routes
+const listingsRouter = require("./routes/listing.js");
+const reviewsRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 const sessionOptions = {
   secret: "mysupersecretcode",
@@ -23,15 +31,31 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 app.use(flash());
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+// use static authenticate method of model in LocalStrategy
+passport.use(new LocalSteategy(User.authenticate()));
+
+// use static serialize and deserialize of model for passport session support
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
   res.locals.warning = req.flash("warning");
   next();
 });
 
-//importig routes
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+// app.get("/demouser", async (req, res) => {
+//   let fakeUser = new User({
+//     email: "student@gmail.com",
+//     username: "khan",
+//   });
+//   let registerUser = await User.register(fakeUser, "HelloWorld");
+//   res.send(registerUser);
+// });
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 async function main() {
@@ -65,8 +89,9 @@ app.get("/", (req, res) => {
 });
 
 //restructring of route
-app.use("/listings", listings);
-app.use("/listings/:id/reviews", reviews);
+app.use("/listings", listingsRouter);
+app.use("/listings/:id/reviews", reviewsRouter);
+app.use("/", userRouter);
 
 // app.get("/testListing", async (req, res) => {
 //   let sampleListing = new Listing({
