@@ -38,7 +38,7 @@ npm init -y
 You can install all packages used directly by the application with one command:
 
 ```bash
-npm i express mongoose ejs ejs-mate method-override joi express-session connect-flash cookie-parser
+npm i express mongoose ejs ejs-mate method-override joi express-session connect-flash cookie-parser passport passport-local
 ```
 
 Or install them individually:
@@ -119,6 +119,8 @@ joi
 express-session
 connect-flash
 cookie-parser
+passport
+passport-local
 ```
 
 ## Transitive Dependencies
