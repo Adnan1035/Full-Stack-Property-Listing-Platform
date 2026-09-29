@@ -16,6 +16,8 @@ This project uses:
 - Express-Session
 - Connect-Flash
 - Cookie-Parser
+- passport
+- passport-local
 
 The project covers RESTful routing, CRUD operations, server-side validation, sessions, cookies, flash messages, middleware, and EJS layouts.
 
